@@ -8,6 +8,7 @@ import {
   ACTION_NEUTRAL,
   NATIVE_FORMAT,
 } from './constants';
+import { useEffect } from 'react';
 
 const MonthPicker = ({
   value,
@@ -18,29 +19,33 @@ const MonthPicker = ({
 }) => {
   invariant(value, 'value prop is required!');
 
-  RNMonthPickerDialogModule.open({
-    value: value.getTime(),
-    minimumDate: minimumDate?.getTime() ?? null,
-    maximumDate: maximumDate?.getTime() ?? null,
-    ...restProps,
-  }).then(
-    ({ action, year, month }) => {
-      let date;
-      switch (action) {
-        case ACTION_DATE_SET:
-        case ACTION_NEUTRAL:
-          date = moment(`${month}-${year}`, NATIVE_FORMAT).endOf('month').toDate();
-          break;
-        case ACTION_DISMISSED:
-        default:
-          date = undefined;
-      }
-      onChange && onChange(action, date);
-    },
-    error => {
-      throw error;
-    },
-  );
+  useEffect(() => {
+    RNMonthPickerDialogModule.open({
+      value: value.getTime(),
+      minimumDate: minimumDate?.getTime() ?? null,
+      maximumDate: maximumDate?.getTime() ?? null,
+      ...restProps,
+    }).then(
+      ({ action, year, month }) => {
+        let date;
+        switch (action) {
+          case ACTION_DATE_SET:
+          case ACTION_NEUTRAL:
+            date = moment(`${month}-${year}`, NATIVE_FORMAT)
+              .endOf('month')
+              .toDate();
+            break;
+          case ACTION_DISMISSED:
+          default:
+            date = undefined;
+        }
+        onChange && onChange(action, date);
+      },
+      error => {
+        throw error;
+      },
+    );
+  }, []);
 
   return null;
 };
